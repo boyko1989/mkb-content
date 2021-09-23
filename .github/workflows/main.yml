@@ -1,0 +1,33 @@
+name: md-deploy
+env:
+  DOMAIN_NAME: "sverchok.ddns.net"
+  USER_NAME: "p_boyko"
+  REPO_NAME: "mkb-content"
+
+on:
+  push:
+    branches:
+      - master
+
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v1
+
+      # Setup key
+      - run: set -eu
+      - run: mkdir "$HOME/.ssh"
+      - run: echo "${{ secrets.key }}" > "$HOME/.ssh/key"
+      - run: chmod 600 "$HOME/.ssh/key"
+
+      #- run: ssh -i $HOME/.ssh/key -o StrictHostKeyChecking=no ${{ env.USER_NAME}}@${{ env.DOMAIN_NAME }} rm -rf /var/www/html/*
+
+      - name: RSYNC to DOMAIN
+        run: rsync -avz --delete --progress -e "ssh -i $HOME/.ssh/key -o StrictHostKeyChecking=no" /home/runner/work/${{ env.REPO_NAME }}/${{ env.REPO_NAME }}/* ${{ env.USER_NAME }}@${{ env.DOMAIN_NAME }}:/var/www/html/markdown/
