@@ -104,6 +104,7 @@ sudo apt install -y php8.0-cli php8.0-dev php8.0-pgsql php8.0-sqlite3 php8.0-gd 
 + **php-common** 
 Это пакет php, который включает в себя общие файлы для пакетов PHP, этот пакет содержит общие утилиты, общие для всех упакованных версий PHP. Пакет php-common содержит файлы, используемые как пакетом php, так и пакетом php-cli.
 <br>
+
    ```bash
    sudo apt install php8.0-common
    ```
@@ -111,6 +112,7 @@ sudo apt install -y php8.0-cli php8.0-dev php8.0-pgsql php8.0-sqlite3 php8.0-gd 
 + **php-cli**
 Интерфейс командной строки. CLI позволяет запускать программы на PHP не через привычную нам клиент-серверную архитектуру, а как простые программы в командной строке.
 <br>
+
    ```bash
    sudo apt install php8.0-cli
    ```
@@ -144,7 +146,7 @@ sudo apt install -y php8.0-cli php8.0-dev php8.0-pgsql php8.0-sqlite3 php8.0-gd 
 Требуемые модули можно установить одной командой:
 
 ```bash
-sudo apt-get install -y software-properties-common && sudo apt-add-repository ppa:ondrej/apache2 -y && sudo apt-add-repository ppa:ondrej/php -y && sudo apt install -y php8.0-{curl,intl,mysql,readline,xml,mbstring}
+sudo apt-get install -y software-properties-common && sudo apt-add-repository ppa:ondrej/apache2 -y && sudo apt-add-repository ppa:ondrej/php -y && sudo apt install -y php8.0-{common,cli,curl,intl,mysql,readline,xml,mbstring}
 ```
 #### Установка FPM
 
@@ -160,7 +162,7 @@ sudo apt install php8.0-fpm
 #### В итоге для установки PHP:
 
 ```bash
-sudo apt install php8.0-{common,cli,curl,intl,mysql,readline,xml,mbstring,fpm}
+sudo apt-get install -y software-properties-common && sudo apt-add-repository ppa:ondrej/apache2 -y && sudo apt-add-repository ppa:ondrej/php -y && sudo apt install -y php8.0-{common,cli,curl,intl,mysql,readline,xml,mbstring,fpm}
 ```
 
 ## Конфиги Nginx
@@ -354,4 +356,23 @@ server {
 
 ## Настройка работы Nginx с PHP-FPM
 
-Нужно просто раскомментировать
+Нужно для начала проверить по какому пути находится unix-сокет PHP-FPM. Стоит поискать в /var/run/php/ . Мне нужен файл php8.0-fpm.sock. Важно правильно прописать путь к сокету в соответствующем месте конфигов, иначе Nginx выдаёт 502 ответ: Bad Gateway. Собственно о подключении. Как говорилось ранее, в файле /etc/nginx/sites-available/default на момент установки прописан минимум для статики, изменим это.
+
+Для начала допишем в список индексных файлов index.php сразу после имени без расширения. Затем, стоит прописать имя сервера. Если отсутствует домен, то за него сойдёт постоянный IP сервера (глобальный, локальный - без разницы).
+
+В блоке "location ~ \\.php$ " нужно раскомментировать строки 
+
+```bash
+include snippets/fastcgi-php.conf;
+fastcgi_pass unix:/var/run/php/php8.0-fpm.sock;
+```
+Я привёл последнюю строку в уже исправленном под мои нужды виде. Об этом было в первом абзаце подзаголовка.
+
+Понятно, что само объявление контекста и закрывающую скобку тоже нужно раскомментировать. Потом проверяем:
+
+```bash
+sudo nginx -t
+```
+
+Ну и всё, если в /var/www/html добавить index.php с любым PHP-кодом, Nginx будет отдавать результаты работы скрипта.
+
