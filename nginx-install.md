@@ -104,6 +104,7 @@ sudo apt install -y php8.0-cli php8.0-dev php8.0-pgsql php8.0-sqlite3 php8.0-gd 
 + **php-common** 
 Это пакет php, который включает в себя общие файлы для пакетов PHP, этот пакет содержит общие утилиты, общие для всех упакованных версий PHP. Пакет php-common содержит файлы, используемые как пакетом php, так и пакетом php-cli.
 <br>
+
    ```bash
    sudo apt install php8.0-common
    ```
@@ -111,6 +112,7 @@ sudo apt install -y php8.0-cli php8.0-dev php8.0-pgsql php8.0-sqlite3 php8.0-gd 
 + **php-cli**
 Интерфейс командной строки. CLI позволяет запускать программы на PHP не через привычную нам клиент-серверную архитектуру, а как простые программы в командной строке.
 <br>
+
    ```bash
    sudo apt install php8.0-cli
    ```
